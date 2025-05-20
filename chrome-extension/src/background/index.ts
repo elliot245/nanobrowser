@@ -100,8 +100,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       logger.info('MCP Host connection attempt result:', success);
       sendResponse({ success });
     } catch (error) {
-      logger.error('Failed to connect to MCP Host:', error);
-      sendResponse({ success: false, error: String(error) });
+      // Get detailed error message, especially important for installation issues
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Failed to connect to MCP Host:', errorMessage);
+
+      // Send the detailed error back to the UI
+      sendResponse({
+        success: false,
+        error: errorMessage,
+      });
+
+      // Log last error from Chrome runtime for debugging
+      if (chrome.runtime.lastError) {
+        logger.error('Chrome runtime last error:', chrome.runtime.lastError);
+      }
     }
 
     return true; // Indicate async response

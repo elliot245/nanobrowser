@@ -1,5 +1,24 @@
 import { useEffect, useState } from 'react';
-import { McpHostOptions, McpHostStatus } from '@src/types';
+
+/**
+ * MCP Host Status interface
+ */
+export interface McpHostStatus {
+  isConnected: boolean;
+  startTime: number | null;
+  lastHeartbeat: number | null;
+  version: string | null;
+  runMode: string | null;
+}
+
+/**
+ * MCP Host Configuration options
+ */
+export interface McpHostOptions {
+  runMode: string;
+  port?: number;
+  logLevel?: string;
+}
 
 /**
  * Custom hook to interact with MCP Host
@@ -49,12 +68,18 @@ export function useMcpHost() {
         }, 1000);
         return true;
       } else {
-        setError('Failed to start MCP Host');
+        // Extract detailed error from response if available
+        const errorMessage = response && response.error ? response.error : 'Failed to start MCP Host';
+
+        console.error('Start MCP Host failed:', errorMessage);
+        setError(errorMessage);
         setLoading(false);
         return false;
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Exception in startMcpHost:', errorMessage);
+      setError(errorMessage);
       setLoading(false);
       return false;
     }
